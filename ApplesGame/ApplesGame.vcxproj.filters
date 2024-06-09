@@ -59,5 +59,8 @@
     <ClInclude Include="sounds.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="fonts.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

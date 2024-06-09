@@ -30,4 +30,17 @@ namespace ApplesGame
     void RotatePlayer(Player& player);
 
     void MovePlayer(Player& player, float timer);
+
+    Circle GetCollider(const Player& player);
+
+    float GetMovementSpeed(const Player& player);
+
+    void SetMovementSpeed(Player& player, float speed);
+
+    void SetPlayerDirection(Player& player, PlayerDirection direction);
+
+    void SetPlayerPosition(Player& player, Position2D position);
+
+    Position2D GetPosition(const Player& player);
+
 }

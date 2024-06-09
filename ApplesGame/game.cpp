@@ -1,26 +1,74 @@
 #include "game.h"
-#include <string>
-#include "fonts.cpp"
+#include "fonts.h"
 
 namespace ApplesGame
 {
-    void RestartGame(Game& game)
+    void StartPlayingState(Game& game)
     {
-        InitPlayer(game.player, game);
+        SetPlayerPosition(game.player, { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 });
+        SetPlayerDirection(game.player, PlayerDirection::Right);
+        SetMovementSpeed(game.player, INITIAL_SPEED);
 
         for (int i = 0; i < NUM_APPLES; i++)
         {
-            InitApple(game.apples[i], game);
+            SetPosition(game.apples[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
         }
 
         for (int i = 0; i < NUM_BLOCKS; i++)
         {
-            InitBlock(game.blocks[i], game);
+            SetPosition(game.blocks[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
         }
 
         game.numEatenApples = 0;
         game.bGameOver = false;
         game.pauseTimer = 0;
+    }
+
+    void UpdatePlayingState(Game& game, float timer)
+    {
+        HandleInput(game);
+        RotatePlayer(game.player);
+        MovePlayer(game.player, timer);
+
+        //обработка столкновений с препятствиями
+        for (int i = 0; i < NUM_BLOCKS; i++)
+        {
+            if (IsShapesCollide(GetCollider(game.player), GetCollider(game.blocks[i])))
+            {
+                StartGameOverState(game);
+            }
+        }
+        //обработка столкновений с яблоками
+        for (int i = 0; i < NUM_APPLES; i++)
+        {
+            if (IsShapesCollide(GetCollider(game.player), GetCollider(game.apples[i])))
+            {
+                SetPosition(game.apples[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
+                SetMovementSpeed(game.player, GetMovementSpeed(game.player) + ACCELERATION);
+                ++game.numEatenApples;
+                game.sounds.eatingSound.play();
+            }
+        }
+        //обработка выхода за границы экрана
+        if (!IsShapesCollide(GetCollider(game.player), game.backgroungRect))
+        {
+            StartGameOverState(game);
+        }
+    }
+
+    void StartGameOverState(Game& game)
+    {
+        game.bGameOver = true;
+        game.sounds.dyingSound.play();
+        game.pauseTimer = 0.f;
+    }
+
+    void UpdateGameOverState(Game& game, float timer)
+    {
+        if (game.pauseTimer >= NEW_GAME_DELAY)
+            StartPlayingState(game);
+        else
+            game.pauseTimer += timer;
     }
 
     void InitGame(Game& game)
@@ -36,7 +84,19 @@ namespace ApplesGame
 
         game.font.loadFromFile(RESOURCES_PATH + "/arial.ttf");
 
-        RestartGame(game);
+        game.backgroungRect.position = { 0, 0 };
+        game.backgroungRect.size = { SCREEN_WIDTH, SCREEN_HEIGHT };
+
+        InitPlayer(game.player, game);
+        for (int i = 0; i < NUM_APPLES; i++)
+        {
+            InitApple(game.apples[i], game);
+        }
+        for (int i = 0; i < NUM_BLOCKS; i++)
+        {
+            InitBlock(game.blocks[i], game);
+        }
+        StartPlayingState(game);
     }
 
     void HandleInput(Game& game)
@@ -63,46 +123,11 @@ namespace ApplesGame
     {
         if (!game.bGameOver)
         {
-            HandleInput(game);
-            RotatePlayer(game.player);
-            MovePlayer(game.player, timer);
-            
-            //обработка столкновений с препятствиями
-            for (int i = 0; i < NUM_BLOCKS; i++)
-            {
-                if (IsRectangesCollied(
-                    game.player.position, Vector2D{ PLAYER_SIZE, PLAYER_SIZE },
-                    game.blocks[i].position, Vector2D{ BLOCK_SIZE, BLOCK_SIZE }))
-                {
-                    game.bGameOver = true;
-                    game.sounds.dyingSound.play();
-                }
-            }
-            //обработка столкновений с яблоками
-            for (int i = 0; i < NUM_APPLES; i++)
-            {
-                if (IsCirclesCollied(game.player.position, PLAYER_SIZE, game.apples[i].position, APPLE_SIZE))
-                {
-                    game.apples[i].position = GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
-                    game.player.speed += ACCELERATION;
-                    ++game.numEatenApples;
-                    game.sounds.eatingSound.play();
-                }
-            }
-            //обработка выхода за границы экрана
-            if (game.player.position.y < 0 + PLAYER_SIZE / 2.f || game.player.position.y + PLAYER_SIZE / 2.f > SCREEN_HEIGHT ||
-                game.player.position.x < 0 + PLAYER_SIZE / 2.f || game.player.position.x + PLAYER_SIZE / 2.f > SCREEN_WIDTH)
-            {
-                game.bGameOver = true;
-                game.sounds.dyingSound.play();
-            }
+            UpdatePlayingState(game, timer);
         }
         else
         {
-            if (game.pauseTimer >= NEW_GAME_DELAY)
-                RestartGame(game);
-            else
-                game.pauseTimer += timer;
+            UpdateGameOverState(game, timer);
         }
     }
 

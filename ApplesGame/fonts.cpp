@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "constants.h"
+#include "fonts.h"
 
 
 namespace ApplesGame

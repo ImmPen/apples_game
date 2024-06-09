@@ -13,4 +13,6 @@ namespace ApplesGame
     struct Game;
     void InitApple(Apple& apple, const Game& game);
     void DrawApple(Apple& apple, sf::RenderWindow& window);
+    Circle GetCollider(const Apple& apple);
+    void SetPosition(Apple& apple, Position2D position);
 }

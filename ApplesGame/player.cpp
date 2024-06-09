@@ -6,9 +6,6 @@ namespace ApplesGame
 {
     void InitPlayer(Player& player, const Game& game)
     {
-        player.position = { SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f };
-        player.speed = INITIAL_SPEED;
-        player.direction = PlayerDirection::Right;
         player.sprite.setRotation(0.f);
         player.sprite.setTexture(game.playerTexture);
         SetSpriteScale(player.sprite, PLAYER_SIZE, PLAYER_SIZE);
@@ -49,17 +46,52 @@ namespace ApplesGame
         switch (player.direction)
         {
         case PlayerDirection::Right:
-            player.position.x += timer * player.speed;
+            SetPlayerPosition(player, { GetPosition(player).x + timer * GetMovementSpeed(player), GetPosition(player).y });
             break;
         case PlayerDirection::Up:
-            player.position.y -= timer * player.speed;
+            SetPlayerPosition(player, { GetPosition(player).x, GetPosition(player).y - timer * GetMovementSpeed(player) });
             break;
         case PlayerDirection::Down:
-            player.position.y += timer * player.speed;
+            SetPlayerPosition(player, { GetPosition(player).x, GetPosition(player).y + timer * GetMovementSpeed(player) });
             break;
         case PlayerDirection::Left:
-            player.position.x -= timer * player.speed;
+            SetPlayerPosition(player, { GetPosition(player).x - timer * GetMovementSpeed(player), GetPosition(player).y });
             break;
         }
     }
+
+    Circle GetCollider(const Player& player)
+    {
+        Circle pl;
+        pl.position = player.position;
+        pl.radius = PLAYER_SIZE;
+        return pl;
+    }
+
+    float GetMovementSpeed(const Player& player)
+    {
+        return player.speed;
+    }
+
+    void SetMovementSpeed(Player& player, float speed)
+    {
+        player.speed = speed;
+    }
+
+    void SetPlayerDirection(Player& player, PlayerDirection direction)
+    {
+        player.direction = direction;
+    }
+
+    void SetPlayerPosition(Player& player, Position2D position)
+    {
+        player.position = position;
+    }
+
+    Position2D GetPosition(const Player& player)
+    {
+        return player.position;
+    }
+
+
 }

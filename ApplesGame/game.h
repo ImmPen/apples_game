@@ -29,9 +29,15 @@ namespace ApplesGame
         sf::SoundBuffer deadSoundBuffer;
 
         sf::Font font;
+
+        Rectangle backgroungRect;
     };
 
-    void RestartGame(Game& game);
+    void StartPlayingState(Game& game);
+    void UpdatePlayingState(Game& game, float timer);
+
+    void StartGameOverState(Game& game);
+    void UpdateGameOverState(Game& game, float timer);
 
     void InitGame(Game& game);
 
