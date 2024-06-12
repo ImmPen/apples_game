@@ -2,8 +2,25 @@
 #include <string>
 #include "Math.h"
 #include "game.h"
+/*
+void ChooseGameMode(ApplesGame::Game& game, sf::RenderWindow& window)
+{
+    sf::Event event;
+    sf::Text choosingText;
+    choosingText.setFont(game.font);
+    choosingText.setString("Choose Game Mode: 1 for endless game, 0 for finite game");
+    choosingText.setCharacterSize(24);
+    window.draw(choosingText);
 
-
+    while (window.pollEvent(event))
+    {
+        if (event.type == sf::Event::TextEntered)
+        {
+            int temp = static_cast<int>(event.text.unicode);
+            game.gameMode += temp << 1;
+        }
+    }
+}*/
 
 int main()
 {
@@ -14,7 +31,8 @@ int main()
     
     Game game;
     InitGame(game);
-    
+    //ChooseGameMode(game, window);
+
     sf::Clock clock;
     clock.restart();
 

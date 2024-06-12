@@ -11,7 +11,8 @@ namespace ApplesGame
     {
         Player player;
 
-        Apple apples[NUM_APPLES];
+        Apple* apples;
+        int numApples;
 
         Rock blocks[NUM_BLOCKS];
 
@@ -31,7 +32,11 @@ namespace ApplesGame
         sf::Font font;
 
         Rectangle backgroungRect;
+
+        int gameMode;
     };
+
+    void ChooseGameMode(Game& game);
 
     void StartPlayingState(Game& game);
     void UpdatePlayingState(Game& game, float timer);

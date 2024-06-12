@@ -16,7 +16,8 @@ namespace ApplesGame
     {
         float dx = (float)fabs(rect1Position.x - rect2Position.x);
         float dy = (float)fabs(rect1Position.y - rect2Position.y);
-        return (dx <= (rect1Size.x + rect2Size.x) / 2.f &&
+        return 
+            (dx <= (rect1Size.x + rect2Size.x) / 2.f &&
             dy <= (rect1Size.y + rect2Size.y) / 2.f);
     }
 
@@ -29,29 +30,25 @@ namespace ApplesGame
         return squareDistance <= squareRadius;
     }
 
-    bool IsShapesCollide(Rectangle& rect1, Rectangle& rect2)
+    bool IsShapesCollide(const Rectangle& rect1, const Rectangle& rect2)
     {
         return IsRectangesCollied(
             rect1.position, rect1.size,
             rect2.position, rect2.size);
     }
 
-    bool IsShapesCollide(Circle& cir1, Circle& cir2)
+    bool IsShapesCollide(const Circle& cir1, const Circle& cir2)
     {
         return IsCirclesCollied(
             cir1.position, cir1.radius,
             cir2.position, cir2.radius);
     }
 
-    bool IsShapesCollide(Circle& cir, Rectangle& rect)
+    bool IsShapesCollide(const Circle& cir, const Rectangle& rect)
     {
-        float dx = std::min(
-            fabs(rect.position.x - cir.position.x),
-            fabs(rect.position.x + rect.size.x - cir.position.x));
-        float dy = std::min(
-            fabs(rect.position.y - cir.position.x),
-            fabs(rect.position.y + rect.size.y - cir.position.y));
-        return (dx * dx + dy * dy) < (cir.radius * cir.radius);
+        return IsRectangesCollied(
+            cir.position, { cir.radius, cir.radius },
+            rect.position, rect.size);
     }
 
     void SetSpriteScale(sf::Sprite& sprite, float desiredWidth, float desiredHeight)

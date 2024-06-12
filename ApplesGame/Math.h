@@ -40,9 +40,9 @@ namespace ApplesGame
         Position2D CirclePosition, float CircleRadius
     );
 
-    bool IsShapesCollide(Rectangle& rect1, Rectangle& rect2);
-    bool IsShapesCollide(Circle& cir, Rectangle& rect);
-    bool IsShapesCollide(Circle& cir1, Circle& cir2);
+    bool IsShapesCollide(const Rectangle& rect1, const Rectangle& rect2);
+    bool IsShapesCollide(const Circle& cir, const Rectangle& rect);
+    bool IsShapesCollide(const Circle& cir1, const Circle& cir2);
 
     void SetSpriteScale(sf::Sprite& sprite, float desiredWidth, float desiredHeight);
     void SetSpriteRelativeOrigin(sf::Sprite& sprite, float originX, float originY);

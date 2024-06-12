@@ -1,5 +1,6 @@
 #include "game.h"
 #include "fonts.h"
+#include <iostream>
 
 namespace ApplesGame
 {
@@ -9,7 +10,7 @@ namespace ApplesGame
         SetPlayerDirection(game.player, PlayerDirection::Right);
         SetMovementSpeed(game.player, INITIAL_SPEED);
 
-        for (int i = 0; i < NUM_APPLES; i++)
+        for (int i = 0; i < game.numApples; i++)
         {
             SetPosition(game.apples[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
         }
@@ -24,12 +25,32 @@ namespace ApplesGame
         game.pauseTimer = 0;
     }
 
+    void HandleInput(Game& game)
+    {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        {
+            game.player.direction = PlayerDirection::Right;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        {
+            game.player.direction = PlayerDirection::Up;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        {
+            game.player.direction = PlayerDirection::Down;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        {
+            game.player.direction = PlayerDirection::Left;
+        }
+    }
+
     void UpdatePlayingState(Game& game, float timer)
     {
         HandleInput(game);
         RotatePlayer(game.player);
         MovePlayer(game.player, timer);
-
+        
         //обработка столкновений с препятствиями
         for (int i = 0; i < NUM_BLOCKS; i++)
         {
@@ -39,7 +60,7 @@ namespace ApplesGame
             }
         }
         //обработка столкновений с яблоками
-        for (int i = 0; i < NUM_APPLES; i++)
+        for (int i = 0; i < game.numApples; i++)
         {
             if (IsShapesCollide(GetCollider(game.player), GetCollider(game.apples[i])))
             {
@@ -52,6 +73,9 @@ namespace ApplesGame
         //обработка выхода за границы экрана
         if (!IsShapesCollide(GetCollider(game.player), game.backgroungRect))
         {
+            Circle collider = GetCollider(game.player);
+            game.backgroungRect;
+            bool fl = IsShapesCollide(collider, game.backgroungRect);
             StartGameOverState(game);
         }
     }
@@ -84,11 +108,16 @@ namespace ApplesGame
 
         game.font.loadFromFile(RESOURCES_PATH + "/arial.ttf");
 
-        game.backgroungRect.position = { 0, 0 };
-        game.backgroungRect.size = { SCREEN_WIDTH, SCREEN_HEIGHT };
+        // передаем центр, т.к. в вычислениях используется центры коллайдеров
+        game.backgroungRect.position = { SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f }; 
+        //вычитаем размеры игрока, чтобы коллизия с игроком прекращалась тогда, когда игрок касается края экрана, а не полностью выходит за него
+        game.backgroungRect.size = { SCREEN_WIDTH - PLAYER_SIZE * 2, SCREEN_HEIGHT - PLAYER_SIZE * 2 }; 
 
         InitPlayer(game.player, game);
-        for (int i = 0; i < NUM_APPLES; i++)
+
+        game.numApples = rand() % NUM_APPLES;
+        game.apples = new Apple[game.numApples];
+        for (int i = 0; i < game.numApples; i++)
         {
             InitApple(game.apples[i], game);
         }
@@ -96,27 +125,9 @@ namespace ApplesGame
         {
             InitBlock(game.blocks[i], game);
         }
+        game.gameMode = 0;
+        //ChooseGameMode(game);
         StartPlayingState(game);
-    }
-
-    void HandleInput(Game& game)
-    {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-        {
-            game.player.direction = PlayerDirection::Right;
-        }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-        {
-            game.player.direction = PlayerDirection::Up;
-        }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-        {
-            game.player.direction = PlayerDirection::Down;
-        }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-        {
-            game.player.direction = PlayerDirection::Left;
-        }
     }
 
     void UpdateGame(Game& game, float timer)
@@ -134,7 +145,7 @@ namespace ApplesGame
     void DrawGame(Game& game, sf::RenderWindow& window)
     {
         DrawPlayer(game.player, window);
-        for (int i = 0; i < NUM_APPLES; i++)
+        for (int i = 0; i < game.numApples; i++)
         {
             DrawApple(game.apples[i], window);
         }
