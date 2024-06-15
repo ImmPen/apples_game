@@ -8,6 +8,7 @@ namespace ApplesGame
     {
         Position2D position;
         sf::Sprite sprite;
+        bool eaten = false;
     };
 
     struct Game;

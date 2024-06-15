@@ -6,6 +6,7 @@ namespace ApplesGame
     void InitApple(Apple& apple, const Game& game)
     {
         apple.sprite.setTexture(game.appleTexture);
+        apple.eaten = false;
         SetSpriteScale(apple.sprite, APPLE_SIZE, APPLE_SIZE);
         SetSpriteRelativeOrigin(apple.sprite, 0.5, 0.5);
     }
@@ -13,7 +14,11 @@ namespace ApplesGame
     void DrawApple(Apple& apple, sf::RenderWindow& window)
     {
         apple.sprite.setPosition(apple.position.x, apple.position.y);
-        window.draw(apple.sprite);
+        if (!apple.eaten)
+        {
+            window.draw(apple.sprite);
+        }
+        
     }
 
     Circle GetCollider(const Apple& apple)

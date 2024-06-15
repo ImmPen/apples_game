@@ -4,6 +4,69 @@
 
 namespace ApplesGame
 {
+    void InitGame(Game& game)
+    {
+        game.playerTexture.loadFromFile(RESOURCES_PATH + "/Player.png");
+        game.appleTexture.loadFromFile(RESOURCES_PATH + "/Apple.png");
+        game.rockTexture.loadFromFile(RESOURCES_PATH + "/Rock.png");
+
+        game.eatSoundBuffer.loadFromFile(RESOURCES_PATH + "/AppleEat.wav");
+        game.deadSoundBuffer.loadFromFile(RESOURCES_PATH + "/Death.wav");
+        game.sounds.eatingSound.setBuffer(game.eatSoundBuffer);
+        game.sounds.dyingSound.setBuffer(game.deadSoundBuffer);
+
+        game.font.loadFromFile(RESOURCES_PATH + "/arial.ttf");
+
+        // передаем центр, т.к. в вычислениях используется центры коллайдеров
+        game.backgroungRect.position = { SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f };
+        //вычитаем размеры игрока, чтобы коллизия с игроком прекращалась тогда, когда игрок касается края экрана, а не полностью выходит за него
+        game.backgroungRect.size = { SCREEN_WIDTH - PLAYER_SIZE * 2, SCREEN_HEIGHT - PLAYER_SIZE * 2 };
+
+        InitPlayer(game.player, game);
+
+        game.numApples = rand() % NUM_APPLES;
+        game.apples = new Apple[game.numApples];
+        for (int i = 0; i < game.numApples; i++)
+        {
+            InitApple(game.apples[i], game);
+        }
+        for (int i = 0; i < NUM_BLOCKS; i++)
+        {
+            InitBlock(game.blocks[i], game);
+        }
+        game.gameMode = 0;
+        StartChoosingState(game);
+    }
+
+    void StartChoosingState(Game& game)
+    {
+        game.currentGameState = 1 << 1;
+    }
+
+    void UpdateChoosingState(Game& game)
+    {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))       // Finite Mode
+        {
+            game.gameMode = (game.gameMode & (0 << 1)) | (game.gameMode & 1);   
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))     //Endless mode
+        {
+            game.gameMode = game.gameMode | (1 << 1);   
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))      // Without acceleration
+        {
+            game.gameMode = (game.gameMode & 0) | (game.gameMode & (1 << 1));         
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))     // With Acceleration
+        {
+            game.gameMode = game.gameMode | 1;         
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        {
+            StartPlayingState(game);
+        }
+    }
+
     void StartPlayingState(Game& game)
     {
         SetPlayerPosition(game.player, { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 });
@@ -12,6 +75,7 @@ namespace ApplesGame
 
         for (int i = 0; i < game.numApples; i++)
         {
+            game.apples[i].eaten = false;
             SetPosition(game.apples[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
         }
 
@@ -21,7 +85,7 @@ namespace ApplesGame
         }
 
         game.numEatenApples = 0;
-        game.bGameOver = false;
+        game.currentGameState = 1;
         game.pauseTimer = 0;
     }
 
@@ -64,25 +128,27 @@ namespace ApplesGame
         {
             if (IsShapesCollide(GetCollider(game.player), GetCollider(game.apples[i])))
             {
-                SetPosition(game.apples[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
-                SetMovementSpeed(game.player, GetMovementSpeed(game.player) + ACCELERATION);
-                ++game.numEatenApples;
-                game.sounds.eatingSound.play();
+                if (PlayerEatsApple(game.player, game.apples[i], game.gameMode))
+                {
+                    ++game.numEatenApples;
+                    game.sounds.eatingSound.play();
+                }
+                if (game.numEatenApples == game.numApples)
+                {
+                    StartGameOverState(game);
+                }
             }
         }
         //обработка выхода за границы экрана
         if (!IsShapesCollide(GetCollider(game.player), game.backgroungRect))
         {
-            Circle collider = GetCollider(game.player);
-            game.backgroungRect;
-            bool fl = IsShapesCollide(collider, game.backgroungRect);
             StartGameOverState(game);
         }
     }
 
     void StartGameOverState(Game& game)
     {
-        game.bGameOver = true;
+        game.currentGameState = 0;
         game.sounds.dyingSound.play();
         game.pauseTimer = 0.f;
     }
@@ -95,44 +161,13 @@ namespace ApplesGame
             game.pauseTimer += timer;
     }
 
-    void InitGame(Game& game)
-    {
-        game.playerTexture.loadFromFile(RESOURCES_PATH + "/Player.png");
-        game.appleTexture.loadFromFile(RESOURCES_PATH + "/Apple.png");
-        game.rockTexture.loadFromFile(RESOURCES_PATH + "/Rock.png");
-
-        game.eatSoundBuffer.loadFromFile(RESOURCES_PATH + "/AppleEat.wav");
-        game.deadSoundBuffer.loadFromFile(RESOURCES_PATH + "/Death.wav");
-        game.sounds.eatingSound.setBuffer(game.eatSoundBuffer);
-        game.sounds.dyingSound.setBuffer(game.deadSoundBuffer);
-
-        game.font.loadFromFile(RESOURCES_PATH + "/arial.ttf");
-
-        // передаем центр, т.к. в вычислениях используется центры коллайдеров
-        game.backgroungRect.position = { SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f }; 
-        //вычитаем размеры игрока, чтобы коллизия с игроком прекращалась тогда, когда игрок касается края экрана, а не полностью выходит за него
-        game.backgroungRect.size = { SCREEN_WIDTH - PLAYER_SIZE * 2, SCREEN_HEIGHT - PLAYER_SIZE * 2 }; 
-
-        InitPlayer(game.player, game);
-
-        game.numApples = rand() % NUM_APPLES;
-        game.apples = new Apple[game.numApples];
-        for (int i = 0; i < game.numApples; i++)
-        {
-            InitApple(game.apples[i], game);
-        }
-        for (int i = 0; i < NUM_BLOCKS; i++)
-        {
-            InitBlock(game.blocks[i], game);
-        }
-        game.gameMode = 0;
-        //ChooseGameMode(game);
-        StartPlayingState(game);
-    }
-
     void UpdateGame(Game& game, float timer)
     {
-        if (!game.bGameOver)
+        if (game.currentGameState & (1 << 1))
+        {
+            UpdateChoosingState(game);
+        }
+        else if (game.currentGameState & 1)
         {
             UpdatePlayingState(game, timer);
         }
@@ -153,7 +188,7 @@ namespace ApplesGame
         {
             DrawBlock(game.blocks[i], window);
         }
-        DrawFont(game.font, game.numEatenApples, game.bGameOver, window);
+        DrawFont(game.font, game.numEatenApples, game.currentGameState, game.gameMode, window);
     }
 
     void DeinitGame()

@@ -19,8 +19,9 @@ namespace ApplesGame
         Sound sounds;
 
         int numEatenApples = 0;
-        bool bGameOver = false;
+        int currentGameState;
         float pauseTimer = 0;
+        int gameMode;
 
         sf::Texture playerTexture;
         sf::Texture appleTexture;
@@ -32,19 +33,18 @@ namespace ApplesGame
         sf::Font font;
 
         Rectangle backgroungRect;
-
-        int gameMode;
     };
 
-    void ChooseGameMode(Game& game);
+    void InitGame(Game& game);
+
+    void StartChoosingState(Game& game);
+    void UpdateChoosingState(Game& game);
 
     void StartPlayingState(Game& game);
     void UpdatePlayingState(Game& game, float timer);
 
     void StartGameOverState(Game& game);
     void UpdateGameOverState(Game& game, float timer);
-
-    void InitGame(Game& game);
 
     void UpdateGame(Game& game, float timer);
 

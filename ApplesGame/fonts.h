@@ -2,5 +2,5 @@
 #include <SFML/Graphics.hpp>
 namespace ApplesGame
 {
-	void DrawFont(sf::Font font, int score, bool bGameOver, sf::RenderWindow& window);
+	void DrawFont(sf::Font font, int score, int currentGameState, int gameMode, sf::RenderWindow& window);
 }

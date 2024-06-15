@@ -93,5 +93,25 @@ namespace ApplesGame
         return player.position;
     }
 
+    bool PlayerEatsApple(Player& player, Apple& apple, int gameMode)
+    {
+        if (!apple.eaten)
+        {
+            if (gameMode & 1)
+            {
+                SetMovementSpeed(player, GetMovementSpeed(player) + ACCELERATION);
+            }
+            if ((gameMode >> 1) & 1)
+            {
+                SetPosition(apple, GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
+            }
+            else
+            {
+                apple.eaten = true;
+            }
+            return true;
+        }
+        return false;
+    }
 
 }
