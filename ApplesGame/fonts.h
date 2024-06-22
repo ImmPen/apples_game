@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+
 namespace ApplesGame
 {
-	void DrawFont(sf::Font font, int score, int currentGameState, int gameMode, sf::RenderWindow& window);
+	struct Game;
+	void DrawFont(sf::RenderWindow& window, const Game& game);
 }

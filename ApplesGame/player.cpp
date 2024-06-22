@@ -1,6 +1,7 @@
 #include "player.h"
 #include "constants.h"
 #include "game.h"
+#include "apple.h"
 
 namespace ApplesGame
 {
@@ -93,10 +94,11 @@ namespace ApplesGame
         return player.position;
     }
 
-    bool PlayerEatsApple(Player& player, Apple& apple, int gameMode)
+    bool PlayerEatsApple(Player& player, Apple& apple, AppleGrid& grid, int gameMode)
     {
         if (!apple.eaten)
         {
+            RemoveAppleFromGrid(apple, grid);
             if (gameMode & 1)
             {
                 SetMovementSpeed(player, GetMovementSpeed(player) + ACCELERATION);
@@ -104,6 +106,7 @@ namespace ApplesGame
             if ((gameMode >> 1) & 1)
             {
                 SetPosition(apple, GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
+                AddAppleToGrid(apple, grid);
             }
             else
             {
@@ -113,5 +116,5 @@ namespace ApplesGame
         }
         return false;
     }
-
+    
 }

@@ -3,6 +3,7 @@
 #include "apple.h"
 #include "rock.h"
 #include "sounds.h"
+#include "records.h"
 #include <SFML/Audio.hpp>
 
 namespace ApplesGame 
@@ -33,6 +34,10 @@ namespace ApplesGame
         sf::Font font;
 
         Rectangle backgroungRect;
+
+        RecordsTable recordsTable;
+
+        AppleGrid grid;
     };
 
     void InitGame(Game& game);
@@ -50,5 +55,5 @@ namespace ApplesGame
 
     void DrawGame(Game& game, sf::RenderWindow& window);
 
-    void DeinitGame();
+    void DeinitGame(Game& game);
 }

@@ -44,6 +44,7 @@ namespace ApplesGame
     Position2D GetPosition(const Player& player);
 
     struct Apple;
+    struct AppleGrid;
 
-    bool PlayerEatsApple(Player& player, Apple& apple, int gameMode);
+    bool PlayerEatsApple(Player& player, Apple& apple, AppleGrid& grid, int gameMode);
 }

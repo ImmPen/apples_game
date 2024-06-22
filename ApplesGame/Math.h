@@ -46,4 +46,6 @@ namespace ApplesGame
 
     void SetSpriteScale(sf::Sprite& sprite, float desiredWidth, float desiredHeight);
     void SetSpriteRelativeOrigin(sf::Sprite& sprite, float originX, float originY);
+
+    std::string GetRandomName();
 }

@@ -64,4 +64,16 @@ namespace ApplesGame
         sprite.setOrigin(spriteRect.width * originX, spriteRect.height * originY);
     }
 
+    std::string GetRandomName()
+    {
+        std::string result = "";
+        int name_length = 3;
+        for (int i = 0; i < name_length; i++)
+        {
+            char sym = rand() % 26 + 65;
+            result += sym;
+        }
+        return result;
+    }
+
 }

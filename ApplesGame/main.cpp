@@ -38,7 +38,7 @@ int main()
         window.display();
     }
 
-    DeinitGame();
+    DeinitGame(game);
 
 	return 0;
 }

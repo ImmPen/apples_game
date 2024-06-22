@@ -4,6 +4,8 @@
 
 namespace ApplesGame
 {
+    
+
     void InitGame(Game& game)
     {
         game.playerTexture.loadFromFile(RESOURCES_PATH + "/Player.png");
@@ -24,7 +26,7 @@ namespace ApplesGame
 
         InitPlayer(game.player, game);
 
-        game.numApples = rand() % NUM_APPLES;
+        game.numApples = rand() % (MAX_NUM_APPLES - MIN_NUM_APPLES) + MIN_NUM_APPLES;
         game.apples = new Apple[game.numApples];
         for (int i = 0; i < game.numApples; i++)
         {
@@ -35,6 +37,9 @@ namespace ApplesGame
             InitBlock(game.blocks[i], game);
         }
         game.gameMode = 0;
+
+        game.recordsTable = GetNewRecordTable();
+
         StartChoosingState(game);
     }
 
@@ -77,6 +82,7 @@ namespace ApplesGame
         {
             game.apples[i].eaten = false;
             SetPosition(game.apples[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
+            AddAppleToGrid(game.apples[i], game.grid);            
         }
 
         for (int i = 0; i < NUM_BLOCKS; i++)
@@ -124,16 +130,19 @@ namespace ApplesGame
             }
         }
         //обработка столкновений с яблоками
-        for (int i = 0; i < game.numApples; i++)
+        int numApplesMayCollidePlayer = 0;
+        Apple** applesMayCollidePlayer;
+        applesMayCollidePlayer = PlayerMayCollideApple(game.player, game.apples, game.grid, numApplesMayCollidePlayer);
+        for (int i = 0; i < numApplesMayCollidePlayer; i++)
         {
-            if (IsShapesCollide(GetCollider(game.player), GetCollider(game.apples[i])))
+            if (IsShapesCollide(GetCollider(game.player), GetCollider(*applesMayCollidePlayer[i])))
             {
-                if (PlayerEatsApple(game.player, game.apples[i], game.gameMode))
+                if (PlayerEatsApple(game.player, *applesMayCollidePlayer[i], game.grid, game.gameMode))
                 {
                     ++game.numEatenApples;
                     game.sounds.eatingSound.play();
                 }
-                if (game.numEatenApples == game.numApples)
+                if (!((game.gameMode >> 1) & 1) && game.numEatenApples == game.numApples)
                 {
                     StartGameOverState(game);
                 }
@@ -148,17 +157,17 @@ namespace ApplesGame
 
     void StartGameOverState(Game& game)
     {
+        addEntryToTable(game.recordsTable, { "YOU", game.numEatenApples });
         game.currentGameState = 0;
         game.sounds.dyingSound.play();
         game.pauseTimer = 0.f;
+        ClearAppleGrid(game.grid);
     }
 
     void UpdateGameOverState(Game& game, float timer)
     {
-        if (game.pauseTimer >= NEW_GAME_DELAY)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
             StartPlayingState(game);
-        else
-            game.pauseTimer += timer;
     }
 
     void UpdateGame(Game& game, float timer)
@@ -188,12 +197,12 @@ namespace ApplesGame
         {
             DrawBlock(game.blocks[i], window);
         }
-        DrawFont(game.font, game.numEatenApples, game.currentGameState, game.gameMode, window);
+        DrawFont(window, game);
     }
 
-    void DeinitGame()
+    void DeinitGame(Game& game)
     {
-        return;
+        ClearAppleGrid(game.grid);
     }
 
 }
