@@ -14,7 +14,7 @@ namespace ApplesGame
 
 	RecordsTable GetNewRecordTable();
 
-	bool compareEntry(RecordEntry first, RecordEntry second);
+	bool CompareEntry(RecordEntry first, RecordEntry second);
 
-	void addEntryToTable(RecordsTable& table, RecordEntry entry);
+	void AddEntryToTable(RecordsTable& table, RecordEntry entry);
 }

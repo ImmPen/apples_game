@@ -4,7 +4,26 @@
 
 namespace ApplesGame
 {
-    
+    void PushGameState(Game& game, GameState state)
+    {
+        game.gameStateStack.push_back(state);
+    }
+    void PopGameState(Game& game)
+    {
+        game.gameStateStack.pop_back();
+    }
+    void SwitchGameState(Game& game, GameState state)
+    {
+        if (game.gameStateStack.size() > 0)
+        {
+            game.gameStateStack.pop_back();
+        }
+        game.gameStateStack.push_back(state);
+    }
+    GameState GetGameState(const Game& game)
+    {
+        return game.gameStateStack.back();
+    }
 
     void InitGame(Game& game)
     {
@@ -26,18 +45,18 @@ namespace ApplesGame
 
         InitPlayer(game.player, game);
 
-        game.numApples = rand() % (MAX_NUM_APPLES - MIN_NUM_APPLES) + MIN_NUM_APPLES;
-        game.apples = new Apple[game.numApples];
-        for (int i = 0; i < game.numApples; i++)
+        int numApples = rand() % (MAX_NUM_APPLES - MIN_NUM_APPLES) + MIN_NUM_APPLES;
+        game.apples.resize(numApples);
+        for (auto& apple : game.apples)
         {
-            InitApple(game.apples[i], game);
+            InitApple(apple, game);
         }
-        for (int i = 0; i < NUM_BLOCKS; i++)
+        game.blocks.resize(NUM_BLOCKS);
+        for (auto& block : game.blocks)
         {
-            InitBlock(game.blocks[i], game);
+            InitBlock(block, game);
         }
         game.gameMode = 0;
-
         game.recordsTable = GetNewRecordTable();
 
         StartChoosingState(game);
@@ -45,7 +64,7 @@ namespace ApplesGame
 
     void StartChoosingState(Game& game)
     {
-        game.currentGameState = 1 << 1;
+        SwitchGameState(game, GameState::Choosing);
     }
 
     void UpdateChoosingState(Game& game)
@@ -78,20 +97,20 @@ namespace ApplesGame
         SetPlayerDirection(game.player, PlayerDirection::Right);
         SetMovementSpeed(game.player, INITIAL_SPEED);
 
-        for (int i = 0; i < game.numApples; i++)
+        for (auto& apple : game.apples)
         {
-            game.apples[i].eaten = false;
-            SetPosition(game.apples[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
-            AddAppleToGrid(game.apples[i], game.grid);            
+            apple.eaten = false;
+            SetPosition(apple, GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
+            AddAppleToGrid(apple, game.grid);            
         }
 
-        for (int i = 0; i < NUM_BLOCKS; i++)
+        for (auto& block : game.blocks)
         {
-            SetPosition(game.blocks[i], GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
+            SetPosition(block, GetRandomPositionOnScreen(SCREEN_WIDTH, SCREEN_HEIGHT));
         }
 
         game.numEatenApples = 0;
-        game.currentGameState = 1;
+        SwitchGameState(game, GameState::Playing);
         game.pauseTimer = 0;
     }
 
@@ -121,31 +140,29 @@ namespace ApplesGame
         RotatePlayer(game.player);
         MovePlayer(game.player, timer);
         
-        //обработка столкновений с препятствиями
-        for (int i = 0; i < NUM_BLOCKS; i++)
-        {
-            if (IsShapesCollide(GetCollider(game.player), GetCollider(game.blocks[i])))
-            {
-                StartGameOverState(game);
-            }
-        }
         //обработка столкновений с яблоками
-        int numApplesMayCollidePlayer = 0;
-        Apple** applesMayCollidePlayer;
-        applesMayCollidePlayer = PlayerMayCollideApple(game.player, game.apples, game.grid, numApplesMayCollidePlayer);
-        for (int i = 0; i < numApplesMayCollidePlayer; i++)
+        std::vector<Apple*> applesMayCollidePlayer = PlayerMayCollideApple(game.player, game.apples, game.grid);
+        for (auto& element : applesMayCollidePlayer)
         {
-            if (IsShapesCollide(GetCollider(game.player), GetCollider(*applesMayCollidePlayer[i])))
+            if (IsShapesCollide(GetCollider(game.player), GetCollider(*element)))
             {
-                if (PlayerEatsApple(game.player, *applesMayCollidePlayer[i], game.grid, game.gameMode))
+                if (PlayerEatsApple(game.player, *element, game.grid, game.gameMode))
                 {
                     ++game.numEatenApples;
                     game.sounds.eatingSound.play();
                 }
-                if (!((game.gameMode >> 1) & 1) && game.numEatenApples == game.numApples)
+                if (!((game.gameMode >> 1) & 1) && game.numEatenApples == game.apples.size())
                 {
                     StartGameOverState(game);
                 }
+            }
+        }
+        //обработка столкновений с препятствиями
+        for (auto& block : game.blocks)
+        {
+            if (IsShapesCollide(GetCollider(game.player), GetCollider(block)))
+            {
+                StartGameOverState(game);
             }
         }
         //обработка выхода за границы экрана
@@ -157,8 +174,8 @@ namespace ApplesGame
 
     void StartGameOverState(Game& game)
     {
-        addEntryToTable(game.recordsTable, { "YOU", game.numEatenApples });
-        game.currentGameState = 0;
+        AddEntryToTable(game.recordsTable, { "YOU", game.numEatenApples });
+        SwitchGameState(game, GameState::GameOver);
         game.sounds.dyingSound.play();
         game.pauseTimer = 0.f;
         ClearAppleGrid(game.grid);
@@ -170,32 +187,54 @@ namespace ApplesGame
             StartPlayingState(game);
     }
 
+    void StartPauseState(Game& game)
+    {
+        PushGameState(game, GameState::Pause);
+    }
+
+    void UpdatePauseState(Game& game, float timer)
+    {
+        game.pauseTimer += timer;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        {
+            PopGameState(game);
+        }
+    }
+
     void UpdateGame(Game& game, float timer)
     {
-        if (game.currentGameState & (1 << 1))
+        GameState currentGameState = GetGameState(game);
+        switch (currentGameState)
         {
+        case GameState::None:
+            break;
+        case GameState::Choosing:
             UpdateChoosingState(game);
-        }
-        else if (game.currentGameState & 1)
-        {
+            break;
+        case GameState::Playing:
             UpdatePlayingState(game, timer);
-        }
-        else
-        {
+            break;
+        case GameState::GameOver:
             UpdateGameOverState(game, timer);
+            break;
+        case GameState::Pause:
+            UpdatePauseState(game, timer);
+            break;
+        default:
+            break;
         }
     }
 
     void DrawGame(Game& game, sf::RenderWindow& window)
     {
         DrawPlayer(game.player, window);
-        for (int i = 0; i < game.numApples; i++)
+        for (auto& apple : game.apples)
         {
-            DrawApple(game.apples[i], window);
+            DrawApple(apple, window);
         }
-        for (int i = 0; i < NUM_BLOCKS; i++)
+        for (auto& block : game.blocks)
         {
-            DrawBlock(game.blocks[i], window);
+            DrawBlock(block, window);
         }
         DrawFont(window, game);
     }
@@ -203,6 +242,29 @@ namespace ApplesGame
     void DeinitGame(Game& game)
     {
         ClearAppleGrid(game.grid);
+    }
+
+    void HandleWindowEvents(Game& game, sf::RenderWindow& window)
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+            {
+                GameState state = GetGameState(game);
+                if (state != GameState::Playing)
+                {
+                    window.close();
+                }
+                else
+                {
+                    StartPauseState(game);
+                }
+            }
+        }
+
     }
 
 }

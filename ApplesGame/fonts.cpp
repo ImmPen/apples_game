@@ -80,23 +80,40 @@ namespace ApplesGame
         
         window.draw(gameOverText);
         window.draw(scoreText);
-        
+    }
+
+    void DrawPauseScreen(sf::RenderWindow& window, sf::Font font)
+    {
+        sf::Text pauseText;
+        pauseText.setFont(font);
+        pauseText.setString(
+            "\tPress Esc to exit\n"
+            "Press Space to continue");
+        pauseText.setCharacterSize(24);
+        pauseText.setOrigin(24 * 5, 24 * 1.5);
+        pauseText.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+        window.draw(pauseText);
     }
 
     void DrawFont(sf::RenderWindow& window, const Game& game)
     {
-        if (game.currentGameState & (1 << 1))
+        GameState state = GetGameState(game);
+        switch (state)
         {
+        case GameState::Choosing:
             DrawChoosingScreen(window, game.font, game.gameMode);
-        }
-        else if (game.currentGameState & 1)
-        {
+            break;
+        case GameState::Playing:
             DrawPlayingScreen(window, game.font, game.numEatenApples);
-        }
-        else
-        {
+            break;
+        case GameState::GameOver:
             DrawLoseScreen(window, game.font, game.numEatenApples, game.recordsTable);
+            break;
+        case GameState::Pause:
+            DrawPauseScreen(window, game.font);
+            break;
+        default:
+            break;
         }
-
     }
 }

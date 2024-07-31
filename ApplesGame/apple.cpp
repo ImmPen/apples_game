@@ -62,12 +62,15 @@ namespace ApplesGame
         try 
         {
             Vector2D top_left = { apple.position.x - APPLE_SIZE / 2, apple.position.y - APPLE_SIZE / 2 };
+
             Vector2D gridCellTopLeft =
             { std::max((int)top_left.x / GRID_CELL_WITDH, 0),
             std::max((int)top_left.y / GRID_CELL_HEIGHT, 0) };
+
             Vector2D gridCellBotRight =
             { std::min((int)(top_left.x + APPLE_SIZE) / GRID_CELL_WITDH, APPLES_GRID_CELLS_H - 1),
             std::min((int)(top_left.y + APPLE_SIZE) / GRID_CELL_HEIGHT, APPLES_GRID_CELLS_V - 1) };
+
             for (int i = gridCellTopLeft.x; i <= gridCellBotRight.x; i++)
             {
                 for (int j = gridCellTopLeft.y; j <= gridCellBotRight.y; j++)
@@ -104,9 +107,10 @@ namespace ApplesGame
         apple.numGridIntersects = 0;
     }
 
-    Apple** PlayerMayCollideApple(Player& player, Apple* apple, AppleGrid& grid, int& numApples)
+    std::vector<Apple*> PlayerMayCollideApple(Player& player, std::vector<Apple> apple, AppleGrid& grid)
     {
-        Apple* result[(4 * MAX_APPLES_IN_CELL)];
+        std::vector<Apple*> result;
+        result.reserve(4 * MAX_APPLES_IN_CELL);
         Vector2D top_left = { player.position.x - PLAYER_SIZE / 2, player.position.y - PLAYER_SIZE / 2 };
         Vector2D gridCellTopLeft =
         { std::max((int)top_left.x / GRID_CELL_WITDH, 0),
@@ -121,7 +125,7 @@ namespace ApplesGame
                 AppleGridCell cell = grid.cells[i][j];
                 for (int c = 0; c < cell.numApplesInGrid; c++)
                 {
-                    result[numApples++] = cell.apples[c];
+                    result.push_back(cell.apples[c]);
                 }
             }
         }

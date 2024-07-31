@@ -12,17 +12,17 @@ namespace ApplesGame
             result.entry[i].name = GetRandomName();
             result.entry[i].score = rand() % 100;
         }
-        std::sort(std::begin(result.entry), std::end(result.entry),  compareEntry);
+        std::sort(std::begin(result.entry), std::end(result.entry),  CompareEntry);
         return result;
     }
-    bool compareEntry(RecordEntry first, RecordEntry second)
+    bool CompareEntry(RecordEntry first, RecordEntry second)
     {
         return first.score > second.score;
     }
-    void addEntryToTable(RecordsTable& table, RecordEntry entry)
+    void AddEntryToTable(RecordsTable& table, RecordEntry entry)
     {
         RecordEntry* placeForNewEntry = std::lower_bound(
-            std::begin(table.entry), std::end(table.entry), entry, compareEntry);
+            std::begin(table.entry), std::end(table.entry), entry, CompareEntry);
         if (placeForNewEntry < std::end(table.entry))
         {
             for (RecordEntry* i = std::end(table.entry) - 1; i > placeForNewEntry; i--)

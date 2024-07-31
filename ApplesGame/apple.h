@@ -34,5 +34,5 @@ namespace ApplesGame
     void ClearAppleGrid(AppleGrid& grid);
     void AddAppleToGrid(Apple& apple, AppleGrid& grid);
     void RemoveAppleFromGrid(Apple& apple, AppleGrid& grid);
-    Apple** PlayerMayCollideApple(Player& player, Apple* apple, AppleGrid& grid, int& numApples);
+    std::vector<Apple*> PlayerMayCollideApple(Player& player, std::vector<Apple>, AppleGrid& grid);
 }
