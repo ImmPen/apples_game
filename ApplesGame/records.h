@@ -1,20 +1,21 @@
 #pragma once
-#include "constants.h"
+#include "GameSettings.h"
 namespace ApplesGame
 {
-	struct RecordEntry
+	struct RecordsTableItem
 	{
 		std::string name;
-		int score;
+		int score = 0;
 	};
+
 	struct RecordsTable
 	{
-		RecordEntry entry[NUM_NAMES_IN_TABLE];
+		RecordsTableItem entry[NUM_NAMES_IN_TABLE];
 	};
 
 	RecordsTable GetNewRecordTable();
 
-	bool CompareEntry(RecordEntry first, RecordEntry second);
+	bool CompareEntry(RecordsTableItem first, RecordsTableItem second);
 
-	void AddEntryToTable(RecordsTable& table, RecordEntry entry);
+	void AddEntryToTable(RecordsTable& table, RecordsTableItem entry);
 }

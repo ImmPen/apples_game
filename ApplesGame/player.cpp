@@ -1,21 +1,53 @@
 #include "player.h"
-#include "constants.h"
+#include "GameSettings.h"
 #include "game.h"
 #include "apple.h"
 
+
 namespace ApplesGame
 {
-    void InitPlayer(Player& player, const Game& game)
+    void InitPlayer(Player& player, sf::Texture& playerTexture)
     {
         player.sprite.setRotation(0.f);
-        player.sprite.setTexture(game.playerTexture);
+        player.sprite.setTexture(playerTexture);
         SetSpriteScale(player.sprite, PLAYER_SIZE, PLAYER_SIZE);
         SetSpriteRelativeOrigin(player.sprite, 0.5, 0.5);
     }
     
     void DrawPlayer(Player& player, sf::RenderWindow& window)
     {
-        player.sprite.setPosition(player.position.x, player.position.y);
+        player.sprite.setPosition(OurVectorToSf(player.position));
+
+        const sf::Vector2f spriteScale = (GetSpriteScale(player.sprite, { PLAYER_SIZE, PLAYER_SIZE }));
+
+        switch (player.direction)
+        {
+        case PlayerDirection::Up:
+        {
+            player.sprite.setScale(spriteScale.x, spriteScale.y);
+            player.sprite.setRotation(-90.f);
+            break;
+        }
+        case PlayerDirection::Right:
+        {
+            player.sprite.setScale(spriteScale.x, spriteScale.y);
+            player.sprite.setRotation(0.f);
+            break;
+        }
+        case PlayerDirection::Down:
+        {
+            player.sprite.setScale(spriteScale.x, spriteScale.y);
+            player.sprite.setRotation(90.f);
+            break;
+        }
+        case PlayerDirection::Left:
+        {
+            player.sprite.setScale(-spriteScale.x, spriteScale.y);
+            player.sprite.setRotation(0.f);
+            break;
+        }
+        }
+
         window.draw(player.sprite);
     }
 
@@ -96,7 +128,7 @@ namespace ApplesGame
 
     bool PlayerEatsApple(Player& player, Apple& apple, AppleGrid& grid, int gameMode)
     {
-        if (!apple.eaten)
+        if (!apple.isEaten)
         {
             RemoveAppleFromGrid(apple, grid);
             if (gameMode & 1)
@@ -110,11 +142,16 @@ namespace ApplesGame
             }
             else
             {
-                apple.eaten = true;
+                apple.isEaten = true;
             }
             return true;
         }
         return false;
+    }
+
+    bool HasPlayerCollisionWithScreenBorder(const Player& player)
+    {
+        return !IsPointInRect(player.position, { 0.f, 0.f }, { (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT });
     }
     
 }

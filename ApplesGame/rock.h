@@ -11,8 +11,9 @@ namespace ApplesGame
     };
 
     struct Game;
-    void InitBlock(Rock& block, const Game& game);
+    void InitBlock(Rock& block, sf::Texture& blockTexture);
     void DrawBlock(Rock& block, sf::RenderWindow& window);
     Rectangle GetCollider(const Rock& block);
     void SetPosition(Rock& block, Position2D position);
+    void ResetBlockPosition(Rock& block);
 }

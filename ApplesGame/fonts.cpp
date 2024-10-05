@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include "constants.h"
+#include "GameSettings.h"
 #include "fonts.h"
 #include "game.h"
 
@@ -94,13 +94,13 @@ namespace ApplesGame
         pauseText.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
         window.draw(pauseText);
     }
-
+    /*
     void DrawFont(sf::RenderWindow& window, const Game& game)
     {
         GameState state = GetGameState(game);
         switch (state)
         {
-        case GameState::Choosing:
+        case GameState::MainMenu:
             DrawChoosingScreen(window, game.font, game.gameMode);
             break;
         case GameState::Playing:
@@ -115,5 +115,5 @@ namespace ApplesGame
         default:
             break;
         }
-    }
+    }*/
 }

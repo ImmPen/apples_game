@@ -3,7 +3,7 @@
 
 namespace ApplesGame
 {
-	const std::string RESOURCES_PATH = "./Resources";
+	const std::string RESOURCES_PATH = "Resources/";
 	const int SCREEN_WIDTH = 800;
 	const int SCREEN_HEIGHT = 600;
 	const float INITIAL_SPEED = 100.f;
@@ -15,7 +15,7 @@ namespace ApplesGame
 	const float NEW_GAME_DELAY = 5;
 	const int NUM_BLOCKS = 5;
 	const float BLOCK_SIZE = 40.f;
-	const int NUM_NAMES_IN_TABLE = 10;
+	const int NUM_NAMES_IN_TABLE = 5;
 	const int MAX_APPLES_IN_CELL = 10;
 	const int GRID_CELL_WITDH = 100;
 	const int GRID_CELL_HEIGHT = 100;

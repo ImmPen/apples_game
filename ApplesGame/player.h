@@ -1,7 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Math.h"
-#include "constants.h"
+#include "GameSettings.h"
 
 namespace ApplesGame
 {
@@ -23,7 +23,7 @@ namespace ApplesGame
 
     struct Game;
 
-    void InitPlayer(Player& player, const Game& game);
+    void InitPlayer(Player& player, sf::Texture& playerTexture);
 
     void DrawPlayer(Player& player, sf::RenderWindow& window);
 
@@ -47,4 +47,6 @@ namespace ApplesGame
     struct AppleGrid;
 
     bool PlayerEatsApple(Player& player, Apple& apple, AppleGrid& grid, int gameMode);
+
+    bool HasPlayerCollisionWithScreenBorder(const Player& player);
 }

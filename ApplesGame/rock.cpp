@@ -3,9 +3,9 @@
 
 namespace ApplesGame
 {
-    void InitBlock(Rock& block, const Game& game)
+    void InitBlock(Rock& block, sf::Texture& blockTexture)
     {
-        block.sprite.setTexture(game.rockTexture);
+        block.sprite.setTexture(blockTexture);
         SetSpriteScale(block.sprite, BLOCK_SIZE, BLOCK_SIZE);
         SetSpriteRelativeOrigin(block.sprite, 0.5, 0.5);
     }
@@ -14,6 +14,12 @@ namespace ApplesGame
     {
         block.sprite.setPosition(block.position.x, block.position.y);
         window.draw(block.sprite);
+    }
+
+    void ResetBlockPosition(Rock& block)
+    {
+        block.position.x = (float)(rand() % SCREEN_WIDTH);
+        block.position.y = (float)(rand() % SCREEN_HEIGHT);
     }
 
     Rectangle GetCollider(const Rock& block)
